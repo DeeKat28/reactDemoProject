@@ -2,10 +2,74 @@ import React from 'react';
 
 class MyForm extends React.Component {
 
-    state = { genderSelectedOption: 'male' }
+    validEmailRegex =
+        RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
+
+    validPhoneRegex = 
+        RegExp(/^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/);
+
+    state = {
+        fullName: '', 
+        gender: 'male',
+        phoneNumber: '',
+        email: '',
+        dob: '',
+        errors: {
+            fullNameErr: '',
+            phoneNumberErr: '',
+            emailErr: '',
+            dobErr: ''
+        }
+    };
 
     handleChange = (event) => {
-        this.setState({ genderSelectedOption: event.target.value })
+
+        const { name, value } = event.target;
+
+        this.setState({
+                [name]: value
+            });
+
+        console.log(name, value);
+
+        let errors = this.state.errors;
+
+        switch(name) {
+            case 'fullName':
+                errors.fullNameErr = value.length < 5 ? 'Name must be 5 characters long!' : '';
+                break;
+            case 'phoneNumber':
+                errors.phoneNumberErr = this.validPhoneRegex.test(value) ? '' : 'Invalid Phone Number';
+                break;
+            case 'email':
+                errors.emailErr = this.validEmailRegex.test(value) ? '' : 'Invalid email address';
+                break;
+            case 'dob':
+                console.log( new Date(value).getFullYear() );
+                errors.dobErr = new Date(value).getFullYear() > 1992 ? '' : 'Not Eligible';
+                break;
+            default:
+                break;
+        }
+
+        //this.setState({
+        //    errors: Object.assign({}, this.state.errors, { [name]: value }), 
+        //}, () => console.log(this.state.errors)
+        //);
+
+        //this.setState({
+        //    errors: {
+        //        ...this.state.errors
+        //    }
+        //}, () => console.log(this.state.errors));
+
+        //this.setState({ errors, [name]: value }, () => {
+        //    console.log(this.state.errors)
+        //});
+
+        this.setState({
+            [name]: value
+        }, () => console.log(this.state.errors));
     }
     
     render() {
@@ -14,8 +78,15 @@ class MyForm extends React.Component {
                 <form className="ui form">
                     <h4 className="ui dividing header">Please provide your information</h4>
                     <div className="field">
-                        <label>Name</label>
-                        <input type="text" name="name" placeholder="Name" />
+                        <label htmlFor="fullName">Full Name</label>
+                        <input 
+                            id="fullName" 
+                            type="text" 
+                            name="fullName" 
+                            placeholder="Full Name" 
+                            value={ this.state.fullName } 
+                            onChange={ this.handleChange } 
+                        />
                     </div>
                     <div className="inline fields">
                         <label>Gender:</label>
@@ -25,8 +96,8 @@ class MyForm extends React.Component {
                                     type="radio" 
                                     name="gender" 
                                     value="male" 
-                                    checked={ this.state.genderSelectedOption === "male" } 
-                                    onChange={this.handleChange} 
+                                    checked={ this.state.gender === "male" } 
+                                    onChange={ e => this.setState({ gender: e.target.value }) }
                                 />
                                 <label>Male</label>
                             </div>
@@ -37,32 +108,53 @@ class MyForm extends React.Component {
                                     type="radio" 
                                     name="gender" 
                                     value="female" 
-                                    checked={ this.state.genderSelectedOption === "female" } 
-                                    onChange={this.handleChange}
+                                    checked={ this.state.gender === "female" } 
+                                    onChange={ e => this.setState({ gender: e.target.value }) }
                                 />
                                 <label>Female</label>
                             </div>
                         </div>
                     </div>
                     <div className="field">
-                        <label>Phone number</label>
-                        <input type="number" name="phoneNumber" placeholder="Phone Number" />
+                        <label htmlFor="phoneNo">Phone number</label>
+                        <input 
+                            id="phoneNo" 
+                            type="number" 
+                            name="phoneNumber" 
+                            placeholder="Phone Number" 
+                            value={ this.state.phoneNumber }
+                            onChange={ this.handleChange }
+                        />
                     </div>
                     <div className="field">
-                        <label>Email</label>
-                        <input type="email" name="email" placeholder="Email" />
+                        <label htmlFor="email">Email</label>
+                        <input 
+                            id="email" 
+                            type="email" 
+                            name="email" 
+                            placeholder="Email" 
+                            value={ this.state.email }
+                            onChange={ this.handleChange }
+                        />
                     </div>
                     <div className="ui calendar">
-                        <label>DOB</label>
+                        <label htmlFor="dob">DOB</label>
                         &nbsp;&nbsp;&nbsp;&nbsp;
                             <div className="ui input left icon">
                             <i className="calendar icon"></i>
-                            <input type="date" placeholder="Date/Time" />
+                            <input 
+                                id="dob"
+                                type="date" 
+                                name="dob"
+                                placeholder="Date/Time" 
+                                value={ this.state.dob }
+                                onChange={ this.handleChange }
+                            />
                         </div>
                     </div>
                     <div className="field">
-                        <label>Comments</label>
-                        <textarea></textarea>
+                        <label htmlFor="comments">Comments</label>
+                        <textarea id="comments"></textarea>
                     </div>
                     <button className="ui button" type="submit">Submit</button>
                 </form>
