@@ -1,12 +1,22 @@
 import React from 'react';
 
+const validEmailRegex =
+    RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
+
+const validPhoneRegex =
+    RegExp(/^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/);
+
+const validateForm = (errors) => {
+    let valid = true;
+
+    Object.values(errors).forEach(
+        (val) => val.length > 0 && (valid = false) //&& can be used as a "guard." Basically it means stop evaluating the expression if one of the operands returns a "falsy" value.
+    );
+
+    return valid;
+}
+
 class MyForm extends React.Component {
-
-    validEmailRegex =
-        RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
-
-    validPhoneRegex = 
-        RegExp(/^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/);
 
     state = {
         fullName: '', 
@@ -26,10 +36,6 @@ class MyForm extends React.Component {
 
         const { name, value } = event.target;
 
-        this.setState({
-                [name]: value
-            });
-
         console.log(name, value);
 
         let errors = this.state.errors;
@@ -39,14 +45,14 @@ class MyForm extends React.Component {
                 errors.fullNameErr = value.length < 5 ? 'Name must be 5 characters long!' : '';
                 break;
             case 'phoneNumber':
-                errors.phoneNumberErr = this.validPhoneRegex.test(value) ? '' : 'Invalid Phone Number';
+                errors.phoneNumberErr = validPhoneRegex.test(value) ? '' : 'Invalid Phone Number';
                 break;
             case 'email':
-                errors.emailErr = this.validEmailRegex.test(value) ? '' : 'Invalid email address';
+                errors.emailErr = validEmailRegex.test(value) ? '' : 'Invalid email address';
                 break;
             case 'dob':
                 console.log( new Date(value).getFullYear() );
-                errors.dobErr = new Date(value).getFullYear() > 1992 ? '' : 'Not Eligible';
+                errors.dobErr = new Date(value).getFullYear() > 2016 ? '' : 'Not Eligible';
                 break;
             default:
                 break;
@@ -71,11 +77,24 @@ class MyForm extends React.Component {
             [name]: value
         }, () => console.log(this.state.errors));
     }
+
+    handleSubmit = (event) => {
+        event.preventDefault();
+
+        if(validateForm(this.state.errors)) {
+            console.info('Valid Form');
+        } else {
+            console.error('Invalid Form');
+        }
+    }
     
     render() {
+
+        const { errors } = this.state;
+
         return (
             <div className="ui left aligned segment">
-                <form className="ui form">
+                <form onSubmit={ this.handleSubmit } className="ui form">
                     <h4 className="ui dividing header">Please provide your information</h4>
                     <div className="field">
                         <label htmlFor="fullName">Full Name</label>
@@ -87,6 +106,8 @@ class MyForm extends React.Component {
                             value={ this.state.fullName } 
                             onChange={ this.handleChange } 
                         />
+                        {errors.fullNameErr.length > 0 && 
+                            <span className="ui negative mini message">{errors.fullNameErr}</span>}
                     </div>
                     <div className="inline fields">
                         <label>Gender:</label>
@@ -125,6 +146,8 @@ class MyForm extends React.Component {
                             value={ this.state.phoneNumber }
                             onChange={ this.handleChange }
                         />
+                        {errors.phoneNumberErr.length > 0 &&
+                            <span className="ui negative mini message">{errors.phoneNumberErr}</span>}
                     </div>
                     <div className="field">
                         <label htmlFor="email">Email</label>
@@ -136,6 +159,8 @@ class MyForm extends React.Component {
                             value={ this.state.email }
                             onChange={ this.handleChange }
                         />
+                        {errors.emailErr.length > 0 &&
+                            <span className="ui negative mini message">{errors.emailErr}</span>}
                     </div>
                     <div className="ui calendar">
                         <label htmlFor="dob">DOB</label>
@@ -150,6 +175,8 @@ class MyForm extends React.Component {
                                 value={ this.state.dob }
                                 onChange={ this.handleChange }
                             />
+                            {errors.dobErr.length > 0 &&
+                                <span className="ui negative mini message">{errors.dobErr}</span>}
                         </div>
                     </div>
                     <div className="field">
